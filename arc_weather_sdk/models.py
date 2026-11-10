@@ -29,6 +29,7 @@ class Forecast:
     source_url: str
     license_url: str
     daily: tuple[dict[str, Any], ...] = ()
+    hourly: tuple[dict[str, Any], ...] = ()
     stale: bool = False
 
 

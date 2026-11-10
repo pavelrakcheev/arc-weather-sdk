@@ -11,6 +11,14 @@ from .regions import Region
 class ForecastQuery:
     point: Point
     days: int = 1
+    hours: int = 48
+
+
+@dataclass(frozen=True, slots=True)
+class PointQuery:
+    """A request that only needs a position."""
+
+    point: Point
 
 
 @dataclass(frozen=True, slots=True)

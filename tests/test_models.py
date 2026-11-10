@@ -1,6 +1,7 @@
 import unittest
+from datetime import datetime, timezone
 
-from arc_weather_sdk import Point, Region, REGIONS, format_weather, weather_payload, Forecast
+from arc_weather_sdk import Point, Region, REGIONS, format_weather, moon_phase, weather_payload, Forecast
 
 
 class ModelTests(unittest.TestCase):
@@ -57,3 +58,21 @@ class ModelTests(unittest.TestCase):
         card = format_weather(weather_payload("Точка", "", forecast))
         self.assertIn("Температура · 0 °C", card)
         self.assertNotIn("Влажность", card)
+
+
+class MoonTests(unittest.TestCase):
+    def test_a_new_moon_has_no_illumination(self):
+        phase = moon_phase(datetime(2000, 1, 6, 18, 14, tzinfo=timezone.utc))
+        self.assertEqual(phase["phase"], "Новолуние")
+        self.assertLess(phase["illumination"], 5)
+
+    def test_a_full_moon_is_fully_illuminated(self):
+        phase = moon_phase(datetime(2023, 1, 6, 18, 24, tzinfo=timezone.utc))
+        self.assertEqual(phase["phase"], "Полнолуние")
+        self.assertGreater(phase["illumination"], 95)
+
+    def test_the_age_stays_inside_the_synodic_month(self):
+        for day in range(1, 29):
+            phase = moon_phase(datetime(2026, 11, day, 12, tzinfo=timezone.utc))
+            self.assertGreaterEqual(phase["age"], 0)
+            self.assertLess(phase["age"], 29.6)

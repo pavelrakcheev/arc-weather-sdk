@@ -56,12 +56,47 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
             seen["key"] = request.headers.get("X-API-Key")
             return httpx.Response(200, json=envelope(FORECAST_ITEM))
 
-        result = await self.client(handler).forecast(Point(42.9, 131.65), days=2)
-        self.assertEqual(seen["params"], {"lat": "42.9", "lon": "131.65", "days": "2"})
+        result = await self.client(handler).forecast(Point(42.9, 131.65), days=10, hours=48)
+        self.assertEqual(seen["params"], {
+            "lat": "42.9", "lon": "131.65", "days": "10", "hours": "48",
+        })
         self.assertEqual(seen["key"], "ak_test")
         self.assertEqual(result.status, "ok")
         self.assertIsInstance(result.items[0], Forecast)
         self.assertEqual(result.items[0].source, "Open-Meteo")
+
+    async def test_hourly_rows_are_restored(self):
+        item = {
+            **FORECAST_ITEM,
+            "hourly": [{"time": "2026-11-10T11:00", "temperature": 4.2, "weather_code": 3}],
+        }
+
+        def handler(request):
+            return httpx.Response(200, json=envelope(item))
+
+        result = await self.client(handler).forecast(Point(42.9, 131.65))
+        self.assertEqual(result.items[0].hourly[0]["time"], "2026-11-10T11:00")
+
+    async def test_place_resolves_the_coordinates(self):
+        def handler(request):
+            return httpx.Response(200, json={
+                "place": {"city": "Владивосток", "country": "Россия", "region": "Приморский край"},
+            })
+
+        place = await self.client(handler).place(Point(43.1155, 131.8855))
+        self.assertEqual(place["city"], "Владивосток")
+        self.assertEqual(place["region"], "Приморский край")
+
+    async def test_radar_returns_the_tile_manifest(self):
+        def handler(request):
+            return httpx.Response(200, json={
+                "host": "https://tilecache.rainviewer.com",
+                "past": [{"time": 1794311400, "path": "/v2/radar/7ec9b44f4013"}],
+            })
+
+        radar = await self.client(handler).radar()
+        self.assertEqual(radar["host"], "https://tilecache.rainviewer.com")
+        self.assertEqual(len(radar["past"]), 1)
 
     async def test_city_returns_the_summary_payload(self):
         def handler(request):

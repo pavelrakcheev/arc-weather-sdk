@@ -8,7 +8,7 @@ import httpx
 from ._version import __version__
 from .errors import ApiError, AuthenticationError, NotFoundError, RateLimitError
 from .models import Point
-from .queries import CityQuery, ForecastQuery, PlanetQuery, RegionalQuery
+from .queries import CityQuery, ForecastQuery, PlanetQuery, PointQuery, RegionalQuery
 from .regions import REGIONS, Region
 from .result import Result
 
@@ -46,7 +46,7 @@ class ArcWeatherClient:
             headers["X-API-Key"] = self._api_key
         return headers
 
-    async def _request(self, method: str, path: str, **kwargs: Any) -> Result:
+    async def _json(self, method: str, path: str, **kwargs: Any) -> dict:
         url = f"{self._base_url}{path}"
         try:
             response = await self._http.request(
@@ -56,7 +56,10 @@ class ArcWeatherClient:
             raise ApiError(f"Arc Weather API is unreachable: {error}") from error
         if response.status_code >= 400:
             raise self._error(response)
-        return Result.from_dict(response.json())
+        return response.json()
+
+    async def _request(self, method: str, path: str, **kwargs: Any) -> Result:
+        return Result.from_dict(await self._json(method, path, **kwargs))
 
     @staticmethod
     def _error(response: httpx.Response) -> ApiError:
@@ -76,12 +79,26 @@ class ArcWeatherClient:
             return NotFoundError(f"{message}: {detail}", status_code=404, detail=detail)
         return ApiError(f"{message}: {detail}", status_code=response.status_code, detail=detail)
 
-    async def forecast(self, point: Point, *, days: int = 1) -> Result:
+    async def forecast(self, point: Point, *, days: int = 10, hours: int = 48) -> Result:
         """Point forecast for every provider that covers the location."""
         return await self._request(
             "GET", "/v1/forecast",
-            params={"lat": point.latitude, "lon": point.longitude, "days": days},
+            params={
+                "lat": point.latitude, "lon": point.longitude,
+                "days": days, "hours": hours,
+            },
         )
+
+    async def place(self, point: Point) -> dict:
+        """Resolve the coordinates into a place name."""
+        payload = await self._json(
+            "GET", "/v1/place", params={"lat": point.latitude, "lon": point.longitude},
+        )
+        return payload.get("place", payload)
+
+    async def radar(self) -> dict:
+        """Tile manifest of the precipitation radar."""
+        return await self._json("GET", "/v1/radar")
 
     async def city(self, name: str, *, days: int = 1) -> Result:
         """City forecast with the provider fallback already applied."""
@@ -152,7 +169,9 @@ class ArcWeatherClient:
 def _encode_request(request: Any) -> dict:
     if isinstance(request, ForecastQuery):
         return {"point": {"latitude": request.point.latitude, "longitude": request.point.longitude},
-                "days": request.days}
+                "days": request.days, "hours": request.hours}
+    if isinstance(request, PointQuery):
+        return {"point": {"latitude": request.point.latitude, "longitude": request.point.longitude}}
     if isinstance(request, CityQuery):
         return {"city": request.city, "days": request.days}
     if isinstance(request, RegionalQuery):

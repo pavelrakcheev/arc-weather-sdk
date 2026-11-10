@@ -1,3 +1,6 @@
+from datetime import datetime
+from math import cos, pi
+
 from .models import Forecast
 
 _CONDITIONS = {
@@ -17,6 +20,37 @@ def condition(code: int | None) -> str:
     if code is None:
         return "неизвестно"
     return _CONDITIONS.get(code, "неизвестно")
+
+
+SYNODIC_MONTH = 29.530588853
+NEW_MOON_JULIAN = 2451550.1
+PHASES = (
+    "Новолуние",
+    "Растущий серп",
+    "Первая четверть",
+    "Растущая луна",
+    "Полнолуние",
+    "Убывающая луна",
+    "Последняя четверть",
+    "Убывающий серп",
+)
+
+
+def moon_phase(moment: datetime) -> dict:
+    """Return the phase of the Moon and its illuminated share.
+
+    The calculation is geometric: the age of the Moon is the distance from the
+    last new moon measured in synodic months.
+    """
+    julian = moment.timestamp() / 86400.0 + 2440587.5
+    age = (julian - NEW_MOON_JULIAN) % SYNODIC_MONTH
+    illumination = (1 - cos(2 * pi * age / SYNODIC_MONTH)) / 2
+    index = int(age / SYNODIC_MONTH * 8 + 0.5) % 8
+    return {
+        "phase": PHASES[index],
+        "illumination": round(illumination * 100),
+        "age": round(age, 1),
+    }
 
 
 def with_condition(data: dict) -> dict:
