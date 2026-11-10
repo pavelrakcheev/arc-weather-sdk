@@ -8,7 +8,9 @@ import httpx
 from ._version import __version__
 from .errors import ApiError, AuthenticationError, NotFoundError, RateLimitError
 from .models import Point
-from .queries import CityQuery, ForecastQuery, PlanetQuery, PointQuery, RegionalQuery
+from .queries import (
+    CityQuery, ForecastQuery, PlanetQuery, PointQuery, RegionalQuery, SearchQuery,
+)
 from .regions import REGIONS, Region
 from .result import Result
 
@@ -96,6 +98,11 @@ class ArcWeatherClient:
         )
         return payload.get("place", payload)
 
+    async def search(self, text: str, *, limit: int = 5) -> list[dict]:
+        """Find places by name."""
+        payload = await self._json("GET", "/v1/search", params={"q": text, "limit": limit})
+        return payload.get("places", [])
+
     async def radar(self) -> dict:
         """Tile manifest of the precipitation radar."""
         return await self._json("GET", "/v1/radar")
@@ -172,6 +179,8 @@ def _encode_request(request: Any) -> dict:
                 "days": request.days, "hours": request.hours}
     if isinstance(request, PointQuery):
         return {"point": {"latitude": request.point.latitude, "longitude": request.point.longitude}}
+    if isinstance(request, SearchQuery):
+        return {"text": request.text, "limit": request.limit}
     if isinstance(request, CityQuery):
         return {"city": request.city, "days": request.days}
     if isinstance(request, RegionalQuery):

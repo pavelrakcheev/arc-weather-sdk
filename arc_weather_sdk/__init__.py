@@ -5,7 +5,7 @@ from .errors import (
 )
 from .models import Forecast, PlanetaryData, Point, SourceData, SourceUnavailable
 from .presentation import condition, format_weather, moon_phase, weather_payload, with_condition
-from .queries import CityQuery, ForecastQuery, PlanetQuery, PointQuery, RegionalQuery
+from .queries import CityQuery, ForecastQuery, PlanetQuery, PointQuery, RegionalQuery, SearchQuery
 from .regions import REGIONS, Region
 from .result import Result
 
@@ -13,6 +13,7 @@ __all__ = [
     "ApiError", "ArcWeatherClient", "ArcWeatherError", "AuthenticationError",
     "CityQuery", "DEFAULT_BASE_URL", "Forecast", "ForecastQuery", "NotFoundError",
     "PlanetQuery", "PlanetaryData", "Point", "PointQuery", "REGIONS", "RateLimitError",
-    "Region", "RegionalQuery", "Result", "SourceData", "SourceUnavailable", "__version__",
+    "Region", "RegionalQuery", "Result", "SearchQuery", "SourceData", "SourceUnavailable",
+    "__version__",
     "condition", "format_weather", "moon_phase", "weather_payload", "with_condition",
 ]

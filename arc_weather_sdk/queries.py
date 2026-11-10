@@ -22,6 +22,14 @@ class PointQuery:
 
 
 @dataclass(frozen=True, slots=True)
+class SearchQuery:
+    """A request that looks for places by name."""
+
+    text: str
+    limit: int = 5
+
+
+@dataclass(frozen=True, slots=True)
 class CityQuery:
     city: str
     days: int = 1
