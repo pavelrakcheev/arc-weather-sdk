@@ -35,6 +35,17 @@ class ModelTests(unittest.TestCase):
         self.assertEqual(payload["current"]["condition"], "облачно")
         self.assertEqual(payload["source"], "Open-Meteo")
 
+    def test_the_weather_code_survives_the_condition(self):
+        forecast = Forecast(
+            module="sinoptic", source="Open-Meteo",
+            valid_at="2026-11-10T10:00:00+10:00", fetched_at="2026-11-10T09:58:11+10:00",
+            timezone="UTC", current={"temperature": 4.2, "weather_code": 61},
+            source_url="https://open-meteo.com/", license_url="https://open-meteo.com/en/terms",
+        )
+        payload = weather_payload("Точка", "", forecast)
+        self.assertEqual(payload["current"]["weather_code"], 61)
+        self.assertEqual(payload["current"]["condition"], "слабый дождь")
+
     def test_format_weather_renders_a_russian_card(self):
         forecast = Forecast(
             module="sinoptic", source="Open-Meteo",

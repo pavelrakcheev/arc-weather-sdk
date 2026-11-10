@@ -56,7 +56,7 @@ def moon_phase(moment: datetime) -> dict:
 def with_condition(data: dict) -> dict:
     """Copy the values and add the readable condition next to the raw code."""
     values = dict(data)
-    code = values.pop("weather_code", None)
+    code = values.get("weather_code")
     values["condition"] = values.get("condition") or condition(code)
     return values
 
