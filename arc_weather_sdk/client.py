@@ -91,11 +91,13 @@ class ArcWeatherClient:
         self,
         region: str | Region,
         *,
+        module: str = "sinoptic",
+        operation: str = "metar",
         point: Point | None = None,
         archive_day: date | None = None,
     ) -> Result:
         """Observations, alerts and archives for a named preset or a custom area."""
-        params: dict[str, Any] = {}
+        params: dict[str, Any] = {"module": module, "operation": operation}
         if isinstance(region, Region):
             params.update({
                 "lat": region.point.latitude, "lon": region.point.longitude,

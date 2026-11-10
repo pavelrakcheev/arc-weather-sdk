@@ -94,8 +94,11 @@ class ClientTests(unittest.IsolatedAsyncioTestCase):
         client = self.client(handler)
         await client.region("primorye")
         await client.region("primorye", point=Point(43, 131))
+        await client.region("primorye", module="marine", operation="marine-stations")
         self.assertEqual(seen[0]["preset"], "primorye")
+        self.assertEqual(seen[0]["operation"], "metar")
         self.assertEqual(seen[1]["lat"], "43.0")
+        self.assertEqual(seen[2]["module"], "marine")
 
     async def test_unknown_preset_is_rejected_before_the_request(self):
         def handler(request):

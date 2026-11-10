@@ -99,6 +99,8 @@
 
 | Параметр | Тип | Описание |
 | --- | --- | --- |
+| `module` | str | Модуль операции, по умолчанию `sinoptic` |
+| `operation` | str | Имя операции, по умолчанию `metar` |
 | `preset` | str | Имя готового профиля: `moscow`, `moscow-oblast`, `sochi-adler`, `primorye` |
 | `lat`, `lon` | float | Центральная точка, если она отличается от профиля |
 | `west`, `south`, `east`, `north` | float | Границы области для произвольной территории |
