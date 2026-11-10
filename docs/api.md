@@ -81,7 +81,62 @@
 | --- | --- | --- |
 | `lat` | float | Широта, от −90 до 90 |
 | `lon` | float | Долгота, от −180 до 180 |
-| `days` | int | От 1 до 3, по умолчанию 1 |
+| `days` | int | От 1 до 16, по умолчанию 10 |
+| `hours` | int | От 0 до 240, по умолчанию 48. Сколько часов почасового ряда вернуть |
+
+Элемент типа `forecast` содержит `current`, `daily` и `hourly`.
+
+Поля `current`: `temperature`, `apparent`, `humidity`, `wind`, `wind_direction`,
+`wind_gusts`, `pressure_msl_hpa`, `surface_pressure_hpa`, `weather_code`,
+`cloud_cover`, `precipitation`, `rain`, `showers`, `snowfall`, `is_day`.
+
+Поля `daily`: `date`, `min`, `max`, `apparent_max`, `precipitation`,
+`precipitation_sum`, `rain_sum`, `snowfall_sum`, `weather_code`, `uv_index_max`,
+`wind_max`, `wind_direction`, `sunrise`, `sunset`, `daylight_seconds`,
+`sunshine_seconds`.
+
+Поля `hourly`: `time`, `temperature`, `apparent`, `humidity`,
+`precipitation_probability`, `precipitation`, `weather_code`, `uv_index`,
+`visibility_m`, `wind`, `wind_direction`, `is_day`.
+
+### `GET /v1/place`
+
+Обратное геокодирование: координаты превращаются в название места.
+
+| Параметр | Тип | Описание |
+| --- | --- | --- |
+| `lat` | float | Широта |
+| `lon` | float | Долгота |
+
+Ответ — объект с полями `city`, `name`, `type`, `district`, `county`, `state`,
+`country`, `postcode`, `latitude` и `longitude`.
+
+### `GET /v1/search`
+
+Поиск населённых пунктов по названию.
+
+| Параметр | Тип | Описание |
+| --- | --- | --- |
+| `q` | str | Название |
+| `limit` | int | От 1 до 20, по умолчанию 5 |
+
+Ответ — `{"places": [...]}`, где каждый элемент устроен как результат `/v1/place`.
+
+### `GET /v1/radar`
+
+Манифест тайлов радара осадков. Без параметров.
+
+```json
+{
+  "host": "https://tilecache.rainviewer.com",
+  "past": [{"time": 1794311400, "path": "/v2/radar/7ec9b44f4013"}],
+  "nowcast": [],
+  "satellite": []
+}
+```
+
+Тайл — это `{host}{path}/{z}/{x}/{y}/{size}.png`. `past` — кадры радара за
+последние два часа, `nowcast` — прогноз осадков вперёд, когда он доступен.
 
 ### `GET /v1/city`
 
