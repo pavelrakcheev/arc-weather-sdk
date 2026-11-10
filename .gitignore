@@ -1,0 +1,14 @@
+.DS_Store
+.env
+.env.*
+.venv/
+__pycache__/
+*.egg-info/
+build/
+dist/
+.coverage
+coverage.xml
+htmlcov/
+.ruff_cache/
+.mypy_cache/
+uv.lock
