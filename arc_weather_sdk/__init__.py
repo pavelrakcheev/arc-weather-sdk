@@ -4,7 +4,7 @@ from .errors import (
     ApiError, ArcWeatherError, AuthenticationError, NotFoundError, RateLimitError,
 )
 from .models import Forecast, PlanetaryData, Point, SourceData, SourceUnavailable
-from .presentation import format_weather, weather_payload
+from .presentation import condition, format_weather, weather_payload, with_condition
 from .queries import CityQuery, ForecastQuery, PlanetQuery, RegionalQuery
 from .regions import REGIONS, Region
 from .result import Result
@@ -14,5 +14,5 @@ __all__ = [
     "CityQuery", "DEFAULT_BASE_URL", "Forecast", "ForecastQuery", "NotFoundError",
     "PlanetQuery", "PlanetaryData", "Point", "REGIONS", "RateLimitError", "Region",
     "RegionalQuery", "Result", "SourceData", "SourceUnavailable", "__version__",
-    "format_weather", "weather_payload",
+    "condition", "format_weather", "weather_payload", "with_condition",
 ]

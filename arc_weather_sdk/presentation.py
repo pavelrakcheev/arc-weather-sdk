@@ -12,10 +12,18 @@ _CONDITIONS = {
 }
 
 
-def _with_condition(data: dict) -> dict:
+def condition(code: int | None) -> str:
+    """Return the Russian description of a WMO weather code."""
+    if code is None:
+        return "неизвестно"
+    return _CONDITIONS.get(code, "неизвестно")
+
+
+def with_condition(data: dict) -> dict:
+    """Copy the values and add the readable condition next to the raw code."""
     values = dict(data)
     code = values.pop("weather_code", None)
-    values["condition"] = values.get("condition") or _CONDITIONS.get(code, "неизвестно")
+    values["condition"] = values.get("condition") or condition(code)
     return values
 
 
@@ -25,8 +33,8 @@ def weather_payload(name: str, country: str, result: Forecast) -> dict:
         "city": name,
         "country": country,
         "timezone": result.timezone,
-        "current": _with_condition(result.current),
-        "daily": [_with_condition(day) for day in result.daily],
+        "current": with_condition(result.current),
+        "daily": [with_condition(day) for day in result.daily],
         "source": result.source,
         "source_url": result.source_url,
         "license_url": result.license_url,
